@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request
 import mysql.connector
 import requests
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 
 def polaczenie():
@@ -43,7 +46,7 @@ def google():
         eq = 0
         for eq in range(count_items):
             tytul = str(q[eq].get("volumeInfo").get("title"))
-            autor = q[eq].get("volumeInfo").get("authors")[0]
+            autor = str(q[eq].get("volumeInfo").get("authors")[0])
             eq = eq + 1
             #add_autor = ("INSERT INTO autorzy (imie_nazwisko) VALUES (\"" + autor + "\")")
             #cursor.execute(add_autor)
