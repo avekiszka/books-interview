@@ -8,7 +8,7 @@
 <body>
     <header>
         <div class="container">
-            <h1 class="logo">Spis Książek</h1>
+            <h1 class="logo">Spis Książek - Import z Formularza</h1>
             <strong>
                 <nav>
                     <ul class="menu">
@@ -20,14 +20,17 @@
             </strong>
         </div>
     </header>
-<table border="1" cellpadding="5" cellspacing="5">
-    {% for row in data %}
+<form method="POST">
+    <table>
         <tr>
-        {% for d in row %}
-            <td>{{ d }}</td>
-        {% endfor %}
+            <td>Tytuł Książki:</td><td> <input type="text" name="tytul"></td>
         </tr>
-    {% endfor %}
-</table>
+        <tr>
+            <td>Autor: </td><td><input type="text" name="autor"></td>
+        </tr>
+        </table>
+ <input type="submit" value="Submit">
+ </form>
+
 </body>
 </html>

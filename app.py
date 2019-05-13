@@ -1,44 +1,79 @@
-from flask import Flask, render_template, json, request
-from flaskext.mysql import MySQL
-from werkzeug import generate_password_hash, check_password_hash
+from flask import Flask, render_template, request
+import mysql.connector
+import requests
+
+
+def polaczenie():
+    db_config = {
+        'user': 'root',
+        'password': '',
+        'host': '172.31.43.137',
+        'database': 'pythonflask'
+    }
+    cnx = mysql.connector.connect(**db_config)
+    cursor = cnx.cursor()
+    return cursor, cnx
+
+
 app = Flask(__name__)
-mysql = MySQL()
-app.config['MYSQL_DATABASE_USER'] = ''
-app.config['MYSQL_DATABASE_PASSWORD'] = ''
-app.config['MYSQL_DATABASE_DB'] = 'BucketList'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-mysql.init_app(app)
 
 
 @app.route("/")
 def main():
-    return render_template('index.html')
+    cursor, cnx = polaczenie()
+    query_table = "SELECT * FROM ksiazki"
+    print(query_table)
+    cursor.execute(query_table)
+    data = cursor.fetchall()
+    cursor.close()
+    cnx.close()
+    return render_template('index.html', data=data)
 
-@app.route("/showSignUp")
-def showSignUp():
-    return render_template('signup.html')
-@app.route('/signUp',methods=['POST'])
-def signUp():
-    _name = request.form['inputName']
-    _email = request.form['inputEmail']
-    _password = request.form['inputPassword']
 
-    if _name and _email and _password:
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        _hashed_password = generate_password_hash(_password)
-        cursor.callproc('sp_createUser', (_name, _email, _hashed_password))
-        data = cursor.fetchall()
+@app.route("/google", methods=['GET', 'POST'])
+def google():
+    if request.method == 'POST':
+        slowo_kluczowe = request.form['skluczowe']
+        cursor, cnx = polaczenie()
+        server_query = "https://www.googleapis.com/books/v1/volumes?q=" + slowo_kluczowe
+        r = requests.get(server_query)
+        slownik = r.json()
+        q = slownik.get("items")
+        count_items = len(q)
+        eq = 0
+        for eq in range(count_items):
+            tytul = str(q[eq].get("volumeInfo").get("title"))
+            autor = q[eq].get("volumeInfo").get("authors")[0]
+            eq = eq + 1
+            #add_autor = ("INSERT INTO autorzy (imie_nazwisko) VALUES (\"" + autor + "\")")
+            #cursor.execute(add_autor)
+            add_book = ("INSERT INTO ksiazki (tytul, autor) VALUES (\"" + tytul + "\", \"" + autor + "\")")
+            print(add_book)
+            cursor.execute(add_book)
+        #query_table = ""
+        print(server_query)
+        #cursor.execute(query_table)
+        cnx.commit()
+        cursor.close()
+        cnx.close()
+    return render_template('google.html')
 
-        if len(data) is 0:
-            conn.commit()
-            return json.dumps({'message': 'User created successfully !'})
-        else:
-            return json.dumps({'error': str(data[0])})
-    else:
-        return json.dumps({'html':'<span>Enter the required fields </span>'})
 
+@app.route("/formatka", methods=['GET', 'POST'])
+def formatka():
+    if request.method == 'POST':
+        tytul_ksiazki = request.form['tytul']
+        imie_autora = request.form['autor']
+        cursor, cnx = polaczenie()
+        query_table = "INSERT INTO ksiazki(tytul,autor) VALUES(%s,%s)"
+        print(query_table)
+        cursor.execute(query_table, (tytul_ksiazki, imie_autora))
+        cnx.commit()
+        cursor.close()
+        cnx.close()
+
+    return render_template('formatka.html')
 
 
 if __name__ == "__main__":
-    app.run(host='172.31.40.246',port=80)
+    app.run(host='172.31.43.137', port=80)
