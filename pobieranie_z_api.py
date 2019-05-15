@@ -18,13 +18,16 @@ q = slownik.get("items")
 count_items = len(q)
 eq = 0
 for eq in range(count_items):
-    tytul = str(q[eq].get("volumeInfo").get("title"))
-    autor = q[eq].get("volumeInfo").get("authors")[0]
-    add_autor = ("INSERT INTO autorzy (imie_nazwisko) VALUES (\""+autor+"\")")
-    cursor.execute(add_autor)
-    add_book = ("INSERT INTO ksiazki (tytul, autor) VALUES (\""+tytul+"\", \""+autor+"\")")
+    tytul = str(q[eq].get("volumeInfo").get("title", "None"))
+    autor = str(q[eq].get("volumeInfo").get("authors", "None")[0])
+    kategoria = str(q[eq].get("volumeInfo").get("categories", "None")[0])
+    opis = str(q[eq].get("volumeInfo").get("description", "None"))
+
+    #add_book = ("INSERT INTO ksiazki (tytul, autor, kategoria, opis) VALUES (\""+tytul+"\", \""+autor+"\", \""+kategoria+"\", \"""+opis+""\" )")
+    add_book = "INSERT INTO ksiazki (tytul, autor, kategoria, opis) VALUES (%s,%s,%s,%s)"
     print(add_book)
-    cursor.execute(add_book)
+    cursor.execute(add_book, (tytul, autor, kategoria, opis))
+
     eq = eq + 1
 cnx.commit()
 cursor.close()

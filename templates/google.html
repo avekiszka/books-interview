@@ -20,13 +20,30 @@
             </strong>
         </div>
     </header>
-<form method="POST">
-    <table>
-        <tr>
-            <td>Podaj słowo kluczowe</td><td> <input type="text" name="skluczowe"></td>
-        </tr>
-        </table>
- <input type="submit" value="Submit">
- </form>
+    <form method="POST">
+        <table>
+            <tr>
+                <td>Podaj słowo kluczowe</td><td> <input type="text" name="skluczowe"></td>
+            </tr>
+            </table>
+    <input type="submit" value="Submit">
+
+    </form>
+    <table border="1" cellpadding="5" cellspacing="5">
+            <tr>
+                <td>ID</td>
+                <td>Tytul</td>
+                <td>Autor</td>
+                <td>Kategoria</td>
+                <td>Opis</td>
+            </tr>
+        {% for row in data %}
+            <tr>
+            {% for d in row %}
+                <td>{{ d }}</td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
 </body>
 </html>

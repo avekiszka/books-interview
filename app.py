@@ -8,10 +8,10 @@ sys.setdefaultencoding('utf8')
 
 def polaczenie():
     db_config = {
-        'user': 'root',
+        'user': '',
         'password': '',
-        'host': '172.31.43.137',
-        'database': 'pythonflask'
+        'host': '',
+        'database': ''
     }
     cnx = mysql.connector.connect(**db_config)
     cursor = cnx.cursor()
@@ -45,21 +45,24 @@ def google():
         count_items = len(q)
         eq = 0
         for eq in range(count_items):
-            tytul = str(q[eq].get("volumeInfo").get("title"))
-            autor = str(q[eq].get("volumeInfo").get("authors")[0])
+            tytul = str(q[eq].get("volumeInfo").get("title", "None"))
+            autor = str(q[eq].get("volumeInfo").get("authors", "None")[0])
+            kategoria = str(q[eq].get("volumeInfo").get("categories", "None")[0])
+            opis = str(q[eq].get("volumeInfo").get("description", "None"))
             eq = eq + 1
-            #add_autor = ("INSERT INTO autorzy (imie_nazwisko) VALUES (\"" + autor + "\")")
-            #cursor.execute(add_autor)
-            add_book = ("INSERT INTO ksiazki (tytul, autor) VALUES (\"" + tytul + "\", \"" + autor + "\")")
+            add_book = "INSERT INTO ksiazki (tytul, autor, kategoria, opis) VALUES (%s,%s,%s,%s)"
             print(add_book)
-            cursor.execute(add_book)
-        #query_table = ""
+            cursor.execute(add_book, (tytul, autor, kategoria, opis))
         print(server_query)
-        #cursor.execute(query_table)
         cnx.commit()
+        query_table = "SELECT * FROM ksiazki"
+        cursor.execute(query_table)
+        data = cursor.fetchall()
         cursor.close()
         cnx.close()
-    return render_template('google.html')
+    else:
+        data = "dupa"
+    return render_template('google.html', data=data)
 
 
 @app.route("/formatka", methods=['GET', 'POST'])
